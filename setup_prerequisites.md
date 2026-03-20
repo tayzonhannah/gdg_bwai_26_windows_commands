@@ -40,9 +40,15 @@
 
 ```gcloud version```
 
-```$gcloudInstaller = "$env:TEMP\GoogleCloudSDKInstaller.exe"```
-```(New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", $gcloudInstaller)```
-```& $gcloudInstaller ```
+```
+$gcloudInstaller = "$env:TEMP\GoogleCloudSDKInstaller.exe"
+(New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", $gcloudInstaller)
+& $gcloudInstaller
+```
+
+> If gcloud command is not recognized after install, use this
+
+```$env:Path += ";$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin"```
 
 # 6. MCP Toolbox
 
@@ -52,10 +58,12 @@
 
 --to install
 
-```$ToolboxVersion = "0.27.0"```
-```$ToolboxDir = "$env:USERPROFILE\.local\bin"```
-```$ToolboxUrl = "https://storage.googleapis.com/genai-toolbox/v${ToolboxVersion}/windows/amd64/toolbox.exe"```
+```
+$ToolboxVersion = "0.27.0"
+$ToolboxDir = "$env:USERPROFILE\.local\bin"
+$ToolboxUrl = "https://storage.googleapis.com/genai-toolbox/v${ToolboxVersion}/windows/amd64/toolbox.exe"
 
-```New-Item -ItemType Directory -Force -Path $ToolboxDir```
-```Invoke-WebRequest -Uri $ToolboxUrl -OutFile "$ToolboxDir\toolbox.exe"```
-```$env:Path += ";$ToolboxDir"```
+New-Item -ItemType Directory -Force -Path $ToolboxDir
+Invoke-WebRequest -Uri $ToolboxUrl -OutFile "$ToolboxDir\toolbox.exe"
+$env:Path += ";$ToolboxDir"
+```
