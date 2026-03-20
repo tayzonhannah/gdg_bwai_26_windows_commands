@@ -1,0 +1,89 @@
+# COPY PASTE THIS INTO THE TERMINAL
+# Setup script for sdd-adk-agents-agy codelab prerequisites (Windows Native).
+# Checks for and installs required tools. Skips anything already installed.
+
+$ErrorActionPreference = "Continue"
+
+function Write-Ok ($message) {
+    Write-Host "  ✓ $message" -ForegroundColor Green
+}
+
+function Write-Missing ($message) {
+    Write-Host "  ✗ $message" -ForegroundColor Yellow
+}
+
+Write-Host "`n=== Checking prerequisites ===`n"
+
+# --- git ---
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    $gitVer = (git --version).Split(' ')[2]
+    Write-Ok "git $gitVer"
+} else {
+    Write-Missing "git not found — installing via winget..."
+    winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
+    Write-Ok "git installed"
+}
+
+# --- curl ---
+if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+    $curlVer = (curl.exe --version | Select-Object -First 1).Split(' ')[1]
+    Write-Ok "curl $curlVer"
+} else {
+    Write-Missing "curl.exe not found. Windows 10/11 includes this natively. Please check your Windows updates."
+}
+
+# --- gcloud CLI ---
+if (Get-Command gcloud -ErrorAction SilentlyContinue) {
+    $gcloudVer = ((gcloud version | Select-Object -First 1) -split '\s+')[3]
+    Write-Ok "gcloud $gcloudVer"
+} else {
+    Write-Missing "gcloud CLI not found — installing..."
+    $installScript = (New-Object Net.WebClient).DownloadString("https://dl.google.com/dl/cloudsdk/channels/rapid/install_google_cloud_sdk.ps1")
+    Invoke-Command -ScriptBlock ([scriptblock]::Create($installScript))
+    Write-Ok "gcloud CLI installed"
+}
+
+# --- uv ---
+if (Get-Command uv -ErrorAction SilentlyContinue) {
+    $uvVer = (uv --version).Split(' ')[1]
+    Write-Ok "uv $uvVer"
+} else {
+    Write-Missing "uv not found — installing..."
+    Invoke-RestMethod -Uri https://astral.sh/uv/install.ps1 | Invoke-Expression
+    $env:Path += ";$HOME\.local\bin"
+    Write-Ok "uv installed"
+}
+
+# --- Python 3.12 (managed by uv) ---
+try {
+    $pythonFind = uv python find 3.12 2>&1
+    if ($LASTEXITCODE -eq 0 -or $pythonFind -like "*python.exe*") {
+        Write-Ok "Python 3.12 (uv-managed: $pythonFind)"
+    } else {
+        throw "Not found"
+    }
+} catch {
+    Write-Missing "Python 3.12 not found — installing via uv..."
+    uv python install 3.12
+    Write-Ok "Python 3.12 installed via uv"
+}
+
+# --- MCP Toolbox for Databases ---
+$TOOLBOX_VERSION = "0.27.0"
+$TOOLBOX_DIR = "$HOME\.local\bin"
+$TOOLBOX_EXE = "$TOOLBOX_DIR\toolbox.exe"
+
+if (Test-Path $TOOLBOX_EXE) {
+    Write-Ok "MCP Toolbox ($TOOLBOX_EXE)"
+} else {
+    Write-Missing "MCP Toolbox not found — installing to $TOOLBOX_DIR..."
+    if (-not (Test-Path $TOOLBOX_DIR)) {
+        New-Item -ItemType Directory -Force -Path $TOOLBOX_DIR | Out-Null
+    }
+    # Fetching the Windows amd64 binary
+    $toolboxUrl = "https://storage.googleapis.com/genai-toolbox/v${TOOLBOX_VERSION}/windows/amd64/toolbox.exe"
+    Invoke-WebRequest -Uri $toolboxUrl -OutFile $TOOLBOX_EXE
+    Write-Ok "MCP Toolbox installed to $TOOLBOX_EXE"
+}
+
+Write-Host "`n=== All prerequisites ready ===`n"
