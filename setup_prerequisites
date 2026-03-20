@@ -1,4 +1,5 @@
 # COPY PASTE THIS INTO THE TERMINAL
+# COPY PASTE THIS INTO THE TERMINAL
 # Setup script for sdd-adk-agents-agy codelab prerequisites (Windows Native).
 # Checks for and installs required tools. Skips anything already installed.
 
@@ -37,9 +38,8 @@ if (Get-Command gcloud -ErrorAction SilentlyContinue) {
     $gcloudVer = ((gcloud version | Select-Object -First 1) -split '\s+')[3]
     Write-Ok "gcloud $gcloudVer"
 } else {
-    Write-Missing "gcloud CLI not found — installing..."
-    $installScript = (New-Object Net.WebClient).DownloadString("https://dl.google.com/dl/cloudsdk/channels/rapid/install_google_cloud_sdk.ps1")
-    Invoke-Command -ScriptBlock ([scriptblock]::Create($installScript))
+    Write-Missing "gcloud CLI not found — installing via winget..."
+    winget install --id Google.CloudSDK -e --source winget --accept-package-agreements --accept-source-agreements
     Write-Ok "gcloud CLI installed"
 }
 
@@ -80,9 +80,9 @@ if (Test-Path $TOOLBOX_EXE) {
     if (-not (Test-Path $TOOLBOX_DIR)) {
         New-Item -ItemType Directory -Force -Path $TOOLBOX_DIR | Out-Null
     }
-    # Fetching the Windows amd64 binary
+    # Fetching the Windows amd64 binary using native curl to avoid Invoke-WebRequest hanging
     $toolboxUrl = "https://storage.googleapis.com/genai-toolbox/v${TOOLBOX_VERSION}/windows/amd64/toolbox.exe"
-    Invoke-WebRequest -Uri $toolboxUrl -OutFile $TOOLBOX_EXE
+    curl.exe -L -o "$TOOLBOX_EXE" "$toolboxUrl"
     Write-Ok "MCP Toolbox installed to $TOOLBOX_EXE"
 }
 
