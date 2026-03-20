@@ -4,9 +4,9 @@
 
 # Git
 -- to check if it's already installed
-git --version
+\n git --version
 -- to install
-winget install --id Git.Git -e --source winget
+\n winget install --id Git.Git -e --source winget
 
 # Curl
 
