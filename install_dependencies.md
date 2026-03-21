@@ -26,3 +26,34 @@ if (Test-Path .env) {
 }
 ```
 
+Instead of:
+
+```
+cat > restaurant_concierge/.env <<EOF
+GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+GOOGLE_CLOUD_LOCATION=global
+GOOGLE_GENAI_USE_VERTEXAI=True
+EOF
+```
+
+Do this:
+
+```
+# 1. Grab the correct project ID directly from gcloud
+$projectId = gcloud config get-value project
+
+# 2. Build the contents of the new .env file
+$envLines = @(
+    "GOOGLE_CLOUD_PROJECT=$projectId",
+    "GOOGLE_CLOUD_LOCATION=global",
+    "GOOGLE_GENAI_USE_VERTEXAI=True"
+)
+
+# 3. Write it to the restaurant_concierge folder
+Set-Content -Path "restaurant_concierge\.env" -Value $envLines
+
+# 4. Print it out to verify it worked perfectly
+Write-Host "✅ Created restaurant_concierge\.env with contents:`n" -ForegroundColor Green
+Get-Content "restaurant_concierge\.env"
+```
+
