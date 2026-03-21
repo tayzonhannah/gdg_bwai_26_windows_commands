@@ -42,3 +42,13 @@ gcloud projects add-iam-policy-binding (gcloud config get-value project) `
    --role="roles/aiplatform.user" `
    --quiet
 ```
+
+```
+uv run python scripts/seed_db.py
+```
+
+```
+$env:GOOGLE_CLOUD_PROJECT = (gcloud config get-value project)
+$env:DB_PASSWORD = "codelabpassword"
+```
+then run uv run python scripts/seed_db.py
